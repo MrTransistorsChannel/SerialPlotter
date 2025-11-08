@@ -171,5 +171,7 @@
     <suppress inspection="NoLabelFor" id="2d57f"/>
     <suppress inspection="I18nForm" id="7aa3"/>
     <suppress inspection="MissingMnemonic" id="7aa3"/>
+    <suppress inspection="MissingMnemonic" id="6b845"/>
+    <suppress inspection="I18nForm" id="a2b58"/>
   </inspectionSuppressions>
 </form>
