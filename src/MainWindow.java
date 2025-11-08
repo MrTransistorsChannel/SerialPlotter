@@ -1,4 +1,5 @@
 import jssc.*;
+import plotting.PlotPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,7 +16,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
     private JButton sendButton;
     private JTextField textSendField;
     private JComboBox<String> lineEndingSelectCBox;
-    private GraphPanel serialPlotPanel;
+    private PlotPanel serialPlotPanel;
     private StatusBar statusBar;
     private JButton portRefreshButton;
 
@@ -30,6 +31,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
         setVisible(true);
 
         portRefreshButton.setBorder(new EmptyBorder(3, 3, 3, 3));
+        serialPlotPanel.setPlotMargins(new int[]{50, 20, 20, 50});
 
         connectButton.addItemListener(event -> {
             // If serial port is not opened
@@ -79,6 +81,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
             }
         });
         portRefreshButton.addActionListener(e -> {
+            portSelectCBox.removeAllItems();
             if (SerialPortList.getPortNames().length > 0) {
                 for (String portName : SerialPortList.getPortNames()) {
                     portSelectCBox.addItem(portName);
@@ -86,7 +89,6 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
                 portSelectCBox.setEnabled(true);
                 connectButton.setEnabled(true);
             } else {
-                portSelectCBox.removeAllItems();
                 portSelectCBox.setEnabled(false);
                 connectButton.setEnabled(false);
             }
@@ -170,7 +172,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
                         if (value != null) {
                             if (validParts >= serialPlotPanel.lineCount()) {
                                 System.out.println("Adding new line to graph\n");
-                                serialPlotPanel.addLine(500);
+                                serialPlotPanel.addLine(2000);
                             }
                             //System.out.printf("Adding new point (%f, %f) to line %d\n", (double) lineCount, value, validParts);
                             serialPlotPanel.getLine(validParts).addPoint(new Point2D.Double(lineCount, value));
@@ -205,7 +207,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
 
         new MainWindow();
 
-        /*GraphLine line = new GraphLine(0, 257);
+        /*plotting.PlotLine line = new plotting.PlotLine(0, 257);
         line.addPoint(new Point2D.Double(0, 0));
 
         for(int i = 0; i < 300; i++)

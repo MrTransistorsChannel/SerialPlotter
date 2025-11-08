@@ -1,8 +1,10 @@
+package plotting;
+
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class GraphLine {
+public class PlotLine {
     private String label;
     private final Color color;
     private final Stroke stroke = new BasicStroke(1.0f);
@@ -18,17 +20,18 @@ public class GraphLine {
 
     private double minX, maxX, minY, maxY;
 
-    public GraphLine(int id, int bufferLength) {
+    public PlotLine(int id, int bufferLength) {
         this.bufferSize = bufferLength;
 
         Color[] graphColors = {
-                Color.BLUE,
-                Color.RED,
-                Color.GREEN,
-                Color.YELLOW,
-                Color.CYAN,
-                Color.MAGENTA,
-                Color.LIGHT_GRAY,
+                Color.decode("#0000FF"),
+                Color.decode("#FF0000"),
+                Color.decode("#009900"),
+                Color.decode("#FF9900"),
+                Color.decode("#CC00CC"),
+                Color.decode("#666666"),
+                Color.decode("#00CCFF"),
+                Color.decode("#000000"),
         };
         this.color = graphColors[id % graphColors.length];
     }
