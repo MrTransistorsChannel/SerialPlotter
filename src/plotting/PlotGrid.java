@@ -65,6 +65,9 @@ public class PlotGrid {
         g.setStroke(gridStroke);
         g.drawRect(xPos, yPos, width, height);
 
+        int xAxisPos = (int) Math.clamp(mapValue(0, minY, maxY, yPos + height, yPos), yPos, yPos + height);
+        int yAxisPos = (int) Math.clamp(mapValue(0, minX, maxX, xPos, xPos + width), xPos, xPos + width);
+
         for (int i = 0; i < nTicksX; i++) {
             double x = minTickX + i * stepX;
             if (x < minX || x > maxX) continue;
@@ -82,6 +85,7 @@ public class PlotGrid {
 
             g.setColor(axisColor);
             g.setStroke(axisStroke);
+            g.drawLine(lineXPos, xAxisPos-5, lineXPos, xAxisPos+5);
             g.drawString(tickLabel, lineXPos - xOffset, yPos + height + yOffset);
         }
 
@@ -103,14 +107,12 @@ public class PlotGrid {
 
             g.setColor(axisColor);
             g.setStroke(gridStroke);
+            g.drawLine(yAxisPos-5, lineYPos, yAxisPos+5, lineYPos);
             g.drawString(tickLabel, xPos - xOffset, lineYPos + yOffset);
         }
 
         g.setColor(axisColor);
         g.setStroke(axisStroke);
-
-        int xAxisPos = (int) Math.clamp(mapValue(0, minY, maxY, yPos + height, yPos), yPos, yPos + height);
-        int yAxisPos = (int) Math.clamp(mapValue(0, minX, maxX, xPos, xPos + width), xPos, xPos + width);
 
         g.drawLine(xPos, xAxisPos, xPos + width, xAxisPos);
         g.drawLine(yAxisPos, yPos, yAxisPos, yPos + height);
