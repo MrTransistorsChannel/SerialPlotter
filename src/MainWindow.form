@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="MainWindow">
+  <grid id="27dc6" binding="MainPanel" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="797" height="498"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="b0999" layout-manager="GridLayoutManager" row-count="1" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="bevel-raised"/>
+        <children>
+          <hspacer id="ec20">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <component id="9b8ae" class="javax.swing.JComboBox" binding="portSelectCBox">
+            <constraints>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <lightWeightPopupEnabled value="false"/>
+              <opaque value="true"/>
+            </properties>
+          </component>
+          <component id="54d79" class="javax.swing.JComboBox" binding="portSpeedCBox">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <editable value="true"/>
+              <model>
+                <item value="300"/>
+                <item value="1200"/>
+                <item value="2400"/>
+                <item value="4800"/>
+                <item value="9600"/>
+                <item value="19200"/>
+                <item value="38400"/>
+                <item value="57600"/>
+                <item value="74880"/>
+                <item value="115200"/>
+                <item value="230400"/>
+                <item value="250000"/>
+                <item value="500000"/>
+                <item value="1000000"/>
+                <item value="2000000"/>
+              </model>
+              <selectedIndex value="9"/>
+            </properties>
+          </component>
+          <component id="6af18" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <labelFor value="9b8ae"/>
+              <text value="Port:"/>
+            </properties>
+          </component>
+          <component id="f6ed8" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <labelFor value="54d79"/>
+              <text value="Port speed:"/>
+            </properties>
+          </component>
+          <component id="7aa3" class="javax.swing.JToggleButton" binding="connectButton">
+            <constraints>
+              <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="Connect"/>
+            </properties>
+          </component>
+          <component id="92665" class="javax.swing.JButton" binding="portRefreshButton">
+            <constraints>
+              <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <icon value="resources/arrow_refresh.png"/>
+              <iconTextGap value="0"/>
+              <selected value="false"/>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="dd584" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="bevel-raised"/>
+        <children>
+          <component id="6b845" class="javax.swing.JButton" binding="sendButton" default-binding="true">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="Send"/>
+            </properties>
+          </component>
+          <component id="a2b58" class="javax.swing.JTextField" binding="textSendField">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value=""/>
+              <toolTipText value="Enter text to send..."/>
+            </properties>
+          </component>
+          <component id="2d57f" class="javax.swing.JComboBox" binding="lineEndingSelectCBox">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <model>
+                <item value="None"/>
+                <item value="CR"/>
+                <item value="LF"/>
+                <item value="CR&amp;LF"/>
+              </model>
+              <selectedIndex value="0"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <component id="74095" class="GraphPanel" binding="serialPlotPanel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <focusable value="false"/>
+        </properties>
+      </component>
+      <component id="87637" class="StatusBar" binding="statusBar">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+    </children>
+  </grid>
+  <inspectionSuppressions>
+    <suppress inspection="I18nForm" id="6af18"/>
+    <suppress inspection="MissingMnemonic" id="6af18"/>
+    <suppress inspection="I18nForm" id="f6ed8"/>
+    <suppress inspection="MissingMnemonic" id="f6ed8"/>
+    <suppress inspection="I18nForm" id="94e31"/>
+    <suppress inspection="MissingMnemonic" id="94e31"/>
+    <suppress inspection="I18nForm" id="6b845"/>
+    <suppress inspection="NoLabelFor" id="a2b58"/>
+    <suppress inspection="NoLabelFor" id="2d57f"/>
+    <suppress inspection="I18nForm" id="7aa3"/>
+    <suppress inspection="MissingMnemonic" id="7aa3"/>
+  </inspectionSuppressions>
+</form>
