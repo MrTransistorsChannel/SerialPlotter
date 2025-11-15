@@ -3,8 +3,13 @@ import plotting.PlotPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.event.ActionListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
+import javax.swing.text.DefaultEditorKit;
+import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.util.Objects;
 
@@ -13,14 +18,13 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
     private JComboBox<String> portSelectCBox;
     private JComboBox<String> portSpeedCBox;
     private JPanel MainPanel;
-    private JButton sendButton;
-    private JTextField textSendField;
-    private JComboBox<String> lineEndingSelectCBox;
     private PlotPanel serialPlotPanel;
     private StatusBar statusBar;
     private JButton portRefreshButton;
+    private JTextArea terminal;
 
     private SerialPort serialPort;
+    private boolean isPlotterLine = false;
 
     public MainWindow() {
         setContentPane(MainPanel);
@@ -39,6 +43,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
                 serialPort = new SerialPort(Objects.requireNonNull(portSelectCBox.getSelectedItem()).toString());
                 try {
                     serialPort.openPort();
+                    serialPort.purgePort(SerialPort.PURGE_RXCLEAR | SerialPort.PURGE_TXCLEAR);  // Clear buffers
                     serialPort.setEventsMask(SerialPort.MASK_RXCHAR + SerialPort.MASK_BREAK);
                     serialPort.addEventListener(this);
                     serialPort.setParams(Integer.parseInt(Objects.requireNonNull(portSpeedCBox.getSelectedItem()).toString()),
@@ -47,9 +52,9 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
                     connectButton.setText("Disconnect");
                     statusBar.setTimedStatus("Serial port opened successfully", 5000);
 
-                    textSendField.setEnabled(true);
-                    lineEndingSelectCBox.setEnabled(true);
-                    sendButton.setEnabled(true);
+                    // Enable terminal panel
+                    terminal.setEnabled(true);
+                    terminal.setText("");
                 } catch (SerialPortException e) {
                     statusBar.setTimedStatus(String.format("Connection error: %s", e.getExceptionType()), 5000);
                     serialPort = null;
@@ -64,19 +69,11 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
                         statusBar.setTimedStatus("Serial port closed", 5000);
                     }
                     connectButton.setText("Connect");
-                    textSendField.setEnabled(false);
-                    lineEndingSelectCBox.setEnabled(false);
-                    sendButton.setEnabled(false);
                 } catch (SerialPortException e) {
                     statusBar.setTimedStatus(String.format("Error while disconnecting: %s", e.getExceptionType()), 5000);
                     serialPort = null;
                     connectButton.setText("Connect");
                     connectButton.setSelected(false);
-
-
-                    textSendField.setEnabled(false);
-                    lineEndingSelectCBox.setEnabled(false);
-                    sendButton.setEnabled(false);
                 }
             }
         });
@@ -94,31 +91,50 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
             }
         });
 
-        // Add event listeners to send button and text field
-        ActionListener sendButtonListener = event -> {
-            String lineEnding = switch (lineEndingSelectCBox.getSelectedIndex()) {
-                case 1 -> "\r";
-                case 2 -> "\n";
-                case 3 -> "\r\n";
-                default -> "";
-            };
+        // Add terminal panel key press handling
+        terminal.setFocusTraversalKeysEnabled(false);
+        ((DefaultCaret) terminal.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 
-            try {
-                serialPort.writeString(textSendField.getText() + lineEnding);
-            } catch (SerialPortException e) {
-                statusBar.setTimedStatus(String.format("Serial port error: %s", e.getExceptionType()), 5000);
-                serialPort = null;
-                connectButton.setText("Connect");
-                connectButton.setSelected(false);
+        // Add copy contextual menu to the text input field.
+        JPopupMenu menu = new JPopupMenu();
+        Action copy = new DefaultEditorKit.CopyAction();
+        copy.putValue(Action.NAME, "Copy");
+        menu.add(copy);
 
-                textSendField.setEnabled(false);
-                lineEndingSelectCBox.setEnabled(false);
-                sendButton.setEnabled(false);
+        terminal.setComponentPopupMenu(menu);
+
+
+        terminal.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_TAB:
+                    case KeyEvent.VK_BACK_SPACE:
+                    case KeyEvent.VK_DELETE:
+                        e.consume();
+                }
             }
-            textSendField.setText("");
-        };
-        sendButton.addActionListener(sendButtonListener);
-        textSendField.addActionListener(sendButtonListener);
+
+            @Override
+            public void keyTyped(KeyEvent event) {
+                event.consume();
+                int keyCode = event.getKeyChar();
+                if (keyCode > 127) {
+                    Toolkit.getDefaultToolkit().beep();
+                    return;
+                }
+
+                try {
+                    if (serialPort != null)
+                        serialPort.writeByte((byte) keyCode);
+                } catch (SerialPortException e) {
+                    statusBar.setTimedStatus(String.format("Serial port error: %s", e.getExceptionType()), 5000);
+                    serialPort = null;
+                    connectButton.setText("Connect");
+                    connectButton.setSelected(false);
+                }
+            }
+        });
 
         if (SerialPortList.getPortNames().length > 0) {
             for (String portName : SerialPortList.getPortNames()) {
@@ -132,7 +148,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
         }
     }
 
-    private final StringBuffer serialBuffer = new StringBuffer(256);
+    private final StringBuffer plotterBuffer = new StringBuffer(256);
     private int lineCount = 0;
 
     @Override
@@ -143,22 +159,59 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
                 if (byteCount == 0)
                     return;
 
-                serialBuffer.append(new String(serialPort.readBytes(byteCount)));
+                byte[] data = serialPort.readBytes(byteCount);
+
+                for (byte chr : data) {
+                    switch (chr) {
+                        case '\b':  // Received a backspace, remove last character
+                            terminal.getDocument().remove(terminal.getText().length() - 1, 1);
+                            break;
+                        case '\n':  // Received a newline, disable plotting if enabled
+                            // If plotting enabled, send to plotter parser, else send to the terminal
+                            if (isPlotterLine)
+                                plotterBuffer.append((char) chr);
+                            else {
+                                terminal.append(String.valueOf((char) chr));
+                                // Move cursor to the end
+                                terminal.setCaretPosition(terminal.getDocument().getLength());
+                                // Remove old lines to prevent infinite memory allocation
+                                while (terminal.getText().length() - 100000 > 0) {
+                                    terminal.getDocument().remove(0, terminal.getText().indexOf('\n') + 1);
+                                }
+                            }
+
+                            isPlotterLine = false;
+                            break;
+                        case '\1':  // received a StartOfHeader symbol, enable plotting
+                            isPlotterLine = true;
+                            break;
+                        default:    // Any other
+                            if (isPlotterLine)
+                                plotterBuffer.append((char) chr);
+                            else {
+                                terminal.append(String.valueOf((char) chr));
+                                // Move cursor to the end
+                                terminal.setCaretPosition(terminal.getDocument().getLength());
+                                // Remove old lines to prevent infinite memory allocation
+                                while (terminal.getText().length() - 100000 > 0) {
+                                    terminal.getDocument().remove(0, terminal.getText().indexOf('\n') + 1);
+                                }
+                            }
+                    }
+                }
 
                 while (true) {
-                    int EOLIndex = serialBuffer.indexOf("\n");
+                    int EOLIndex = plotterBuffer.indexOf("\n");
                     if (EOLIndex == -1)
                         break;
-                    String line = serialBuffer.substring(0, EOLIndex).trim();
-                    serialBuffer.delete(0, EOLIndex + 1);
+                    String line = plotterBuffer.substring(0, EOLIndex).trim();
+                    plotterBuffer.delete(0, EOLIndex + 1);
                     if (line.isEmpty())
                         continue;
 
                     String[] fields = line.split("[, \t]+");
                     if (fields.length == 0)
                         continue;
-
-                    //System.out.printf("Found %d fields\n", fields.length);
 
                     int validParts = 0;
                     for (String field : fields) {
@@ -171,10 +224,8 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
 
                         if (value != null) {
                             if (validParts >= serialPlotPanel.lineCount()) {
-                                System.out.println("Adding new line to graph\n");
                                 serialPlotPanel.addLine(2000);
                             }
-                            //System.out.printf("Adding new point (%f, %f) to line %d\n", (double) lineCount, value, validParts);
                             serialPlotPanel.getLine(validParts).addPoint(new Point2D.Double(lineCount, value));
                             validParts++;
                         }
@@ -184,17 +235,14 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
 
                     lineCount++;
                 }
-                //System.out.printf("Graph bounds are [%f, %f, %f, %f]\n", serialPlotPanel.getMinX(), serialPlotPanel.getMaxX(), serialPlotPanel.getMinY(), serialPlotPanel.getMaxY());
                 SwingUtilities.invokeLater(this::repaint);
             } catch (SerialPortException e) {
                 statusBar.setTimedStatus(String.format("Serial port error: %s", e.getExceptionType()), 5000);
                 serialPort = null;
                 connectButton.setText("Connect");
                 connectButton.setSelected(false);
-
-                textSendField.setEnabled(false);
-                lineEndingSelectCBox.setEnabled(false);
-                sendButton.setEnabled(false);
+            } catch (BadLocationException e) {
+                throw new RuntimeException(e);
             }
         }
     }
