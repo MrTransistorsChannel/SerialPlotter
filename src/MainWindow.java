@@ -43,7 +43,6 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
                 serialPort = new SerialPort(Objects.requireNonNull(portSelectCBox.getSelectedItem()).toString());
                 try {
                     serialPort.openPort();
-                    serialPort.purgePort(SerialPort.PURGE_RXCLEAR | SerialPort.PURGE_TXCLEAR);  // Clear buffers
                     serialPort.setEventsMask(SerialPort.MASK_RXCHAR + SerialPort.MASK_BREAK);
                     serialPort.addEventListener(this);
                     serialPort.setParams(Integer.parseInt(Objects.requireNonNull(portSpeedCBox.getSelectedItem()).toString()),
@@ -224,7 +223,7 @@ public class MainWindow extends JFrame implements SerialPortEventListener {
 
                         if (value != null) {
                             if (validParts >= serialPlotPanel.lineCount()) {
-                                serialPlotPanel.addLine(2000);
+                                serialPlotPanel.addLine(2000);      // Line length
                             }
                             serialPlotPanel.getLine(validParts).addPoint(new Point2D.Double(lineCount, value));
                             validParts++;
