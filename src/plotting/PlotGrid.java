@@ -74,7 +74,7 @@ public class PlotGrid {
 
             int lineXPos = (int) mapValue(x, minX, maxX, xPos, xPos + width);
 
-            String tickLabel = String.valueOf(x);
+            String tickLabel = String.format("%.2f", x);
             Rectangle2D fRect = g.getFontMetrics().getStringBounds(tickLabel, g);
             int xOffset = (int) fRect.getWidth() / 2;
             int yOffset = (int) (5 + fRect.getHeight());
@@ -95,8 +95,7 @@ public class PlotGrid {
 
             int lineYPos = (int) mapValue(y, minY, maxY, yPos + height, yPos);
 
-            String tickLabel = String.valueOf(y);
-            //String tickLabel = String.format("%.1E", y);
+            String tickLabel = String.format("%.2f", y);
             Rectangle2D fRect = g.getFontMetrics().getStringBounds(tickLabel, g);
             int xOffset = (int) (5 + fRect.getWidth());
             int yOffset = (int) fRect.getHeight() / 2;
